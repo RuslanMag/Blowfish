@@ -1,19 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Blowfish
 {
+
+    /// <summary>
+    /// Класс, обеспечивающий шифрование Blowfish.
+    /// </summary>
     internal class BlowfishCore
     {
-        const int N = 16;
+        const int N = 16; //Константа количества итераций
 
-        private uint[,] _s;
-        private uint[] _p;
+        private uint[,] _s; //Матрица подстановки (S-Блоки)
+        private uint[] _p; //Матрица раундовых ключей (P-Блок)
 
-        private void KeyExtention(byte[] key)
+        /// <summary>
+        /// Производит расширение предоставленного ключа и подготавливает блоки.
+        /// </summary>
+        /// <param name="key">Ключ шифрования.</param>
+        private void KeyExtension(byte[] key)
         {
             short i;
             short j = 0;
@@ -57,12 +63,21 @@ namespace Blowfish
             }
         }
 
-        public void KeyExtention(string key)
+        /// <summary>
+        /// Производит расширение предоставленного ключа и подготавливает блоки.
+        /// </summary>
+        /// <param name="key">Ключ шифрования.</param>
+        public void KeyExtension(string key)
         {
-            byte[] data = Encoding.ASCII.GetBytes(key);
-            KeyExtention(data);
+            byte[] data = Encoding.UTF8.GetBytes(key);
+            KeyExtension(data);
         }
 
+        /// <summary>
+        /// Реализует функцию F.
+        /// </summary>
+        /// <param name="x">Входящие данные</param>
+        /// <returns></returns>
         private uint F(uint x)
         {
             var d = (ushort)(x & 0x00FF);
@@ -80,6 +95,11 @@ namespace Blowfish
             return y;
         }
 
+        /// <summary>
+        /// Шифрует битовый массив.
+        /// </summary>
+        /// <param name="data">Массив для шифрования.</param>
+        /// <param name="length">The amount to encrypt.</param>
         private void Encipher(byte[] data, int length)
         {
             if (length % 8 != 0)
@@ -87,6 +107,7 @@ namespace Blowfish
 
             for (int i = 0; i < length; i += 8)
             {
+                // Encode the data in 8 byte blocks.
                 var xl = (uint)((data[i] << 24) |
                                 (data[i + 1] << 16) |
                                 (data[i + 2] << 8) |
@@ -96,7 +117,7 @@ namespace Blowfish
                                 (data[i + 6] << 8) |
                                 data[i + 7]);
                 (xl, xr) = Encipher(xl, xr);
-
+                // Now Replace the data.
                 data[i] = (byte)(xl >> 24);
                 data[i + 1] = (byte)(xl >> 16);
                 data[i + 2] = (byte)(xl >> 8);
@@ -108,6 +129,11 @@ namespace Blowfish
             }
         }
 
+        /// <summary>
+        /// Шифрует 8 бит данных (1 блок).
+        /// </summary>
+        /// <param name="xl">Левая часть 8 бит.</param>
+        /// <param name="xr">Правая часть 8 бит.</param>
         private (uint data_l, uint data_r) Encipher(uint xl, uint xr)
         {
             short i;
@@ -120,9 +146,11 @@ namespace Blowfish
                 xL ^= _p[i];
                 xR = F(xL) ^ xR;
 
+                /* Exchange Xl and Xr */
                 (xL, xR) = Swap(xL, xR);
             }
 
+            /* Exchange Xl and Xr */
             (xL, xR) = Swap(xL, xR);
 
             xR ^= _p[N];
@@ -134,9 +162,14 @@ namespace Blowfish
             return (xl, xr);
         }
 
+        /// <summary>
+        /// Шифрует строку.
+        /// </summary>
+        /// <param name="data">Строка для шифрования.</param>
+        /// <returns>Зашифрованную строку</returns>
         public string Encipher(string data)
         {
-            var b = Encoding.ASCII.GetBytes(data);
+            var b = Encoding.UTF8.GetBytes(data);
 
             if (b.Length % 8 != 0)
                 b = b.Concat(new byte[8 - b.Length % 8]).ToArray();
@@ -146,11 +179,17 @@ namespace Blowfish
             return Convert.ToBase64String(b);
         }
 
+        /// <summary>
+        /// Расшифровывает битовый массив.
+        /// </summary>
+        /// <param name="data">Массив для расшифрования.</param>
+        /// <param name="length">The amount to decrypt.</param>
         private void Decipher(byte[] data, int length)
         {
             if (length % 8 != 0)
                 throw new Exception("Invalid Length");
 
+            // Encode the data in 8 byte blocks.
             for (var i = 0; i < length; i += 8)
             {
                 var xl = (uint)((data[i] << 24) |
@@ -160,7 +199,7 @@ namespace Blowfish
                                 (data[i + 5] << 16) |
                                 (data[i + 6] << 8) | data[i + 7]);
                 (xl, xr) = Decipher(xl, xr);
-
+                // Now Replace the data.
                 data[i] = (byte)(xl >> 24);
                 data[i + 1] = (byte)(xl >> 16);
                 data[i + 2] = (byte)(xl >> 8);
@@ -172,6 +211,11 @@ namespace Blowfish
             }
         }
 
+        /// <summary>
+        /// Расшифровывает 8 бит данных (1 блок).
+        /// </summary>
+        /// <param name="xl">Левая часть 8 бит.</param>
+        /// <param name="xr">Правая часть 8 бит.</param>
         private (uint xL, uint xR) Decipher(uint xl, uint xr)
         {
             short i;
@@ -197,6 +241,11 @@ namespace Blowfish
             return (xL, xR);
         }
 
+        /// <summary>
+        /// Расшифровывает строку.
+        /// </summary>
+        /// <param name="data">Строка для расшифрования.</param>
+        /// <returns>Расшифровыванную строку</returns>
         public string Decipher(string data)
         {
             byte[] b = Convert.FromBase64String(data);
@@ -206,9 +255,15 @@ namespace Blowfish
 
             Decipher(b, b.Length);
 
-            return Encoding.ASCII.GetString(b);
+            return Encoding.UTF8.GetString(b);
         }
 
+        /// <summary>
+        /// Меняет переменные местами
+        /// </summary>
+        /// <param name="a">Левая переменная.</param>
+        /// <param name="b">Правая переменная.</param>
+        /// <returns>Переменные, которые поменяли местами</returns>
         private (uint left, uint right) Swap(uint a, uint b)
         {
             var tmp = a;

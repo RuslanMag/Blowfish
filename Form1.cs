@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Blowfish
@@ -23,69 +16,80 @@ namespace Blowfish
 
         private void button1_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            dlg.FilterIndex = 2;
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                textBox2.Text = dlg.FileName;
-                StreamReader reader = new StreamReader(dlg.FileName, Encoding.Default);
-                richTextBox1.Text = reader.ReadToEnd();
-                reader.Close();
-            }
-
-            dlg.Dispose();
+            OpenFile(richTextBox1);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                StreamWriter writer = new StreamWriter(dlg.FileName);
-                writer.Write(richTextBox1.Text);
-                writer.Close();
-            }
-
-            dlg.Dispose();
+            SaveFile(richTextBox1);
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            CheckKey();
-            bf.KeyExtention(textBox1.Text);
-            richTextBox1.Text = bf.Decipher(richTextBox2.Text);
+            if (CheckKey() && CheckTextBox(richTextBox2))
+            {
+                bf.KeyExtension(textBox1.Text);
+                richTextBox1.Text = bf.Decipher(richTextBox2.Text);
+            }
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            CheckKey();
-            bf.KeyExtention(textBox1.Text);
-            richTextBox2.Text = bf.Encipher(richTextBox1.Text);
+            if (CheckKey() && CheckTextBox(richTextBox1))
+            {
+                bf.KeyExtension(textBox1.Text);
+                richTextBox2.Text = bf.Encipher(richTextBox1.Text);
+            }            
         }
 
-        private void CheckKey()
+        private void button5_Click(object sender, EventArgs e)
+        {
+            OpenFile(richTextBox2);
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            SaveFile(richTextBox2);
+        }
+
+        private bool CheckKey()
         {
             if (String.IsNullOrEmpty(textBox1.Text))
             {
                 MessageBox.Show(
-                 "Введите ключ",
-                 "Внимание!",
-                 MessageBoxButtons.OK,
-                 MessageBoxIcon.Warning,
-                 MessageBoxDefaultButton.Button1,
-                 MessageBoxOptions.DefaultDesktopOnly);
+                "Введите ключ",
+                "Внимание!",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button1,
+                MessageBoxOptions.DefaultDesktopOnly);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        private bool CheckTextBox(RichTextBox richTextBox)
+        {
+            if (String.IsNullOrEmpty(richTextBox.Text))
+            {
+                MessageBox.Show(
+                "Пустое поле",
+                "Внимание!",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button1,
+                MessageBoxOptions.DefaultDesktopOnly);
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void OpenFile(RichTextBox textField)
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
@@ -97,14 +101,14 @@ namespace Blowfish
             {
                 textBox2.Text = dlg.FileName;
                 StreamReader reader = new StreamReader(dlg.FileName, Encoding.Default);
-                richTextBox2.Text = reader.ReadToEnd();
+                textField.Text = reader.ReadToEnd();
                 reader.Close();
             }
 
             dlg.Dispose();
         }
 
-        private void button6_Click(object sender, EventArgs e)
+        private void SaveFile(RichTextBox textField)
         {
             SaveFileDialog dlg = new SaveFileDialog();
 
@@ -114,7 +118,7 @@ namespace Blowfish
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 StreamWriter writer = new StreamWriter(dlg.FileName);
-                writer.Write(richTextBox2.Text);
+                writer.Write(textField.Text);
                 writer.Close();
             }
 
