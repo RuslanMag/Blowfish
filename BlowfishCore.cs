@@ -75,8 +75,8 @@ namespace Blowfish
         /// <param name="key">Ключ шифрования.</param>
         public void KeyExtension(string key)
         {            
-            byte[] data = Encoding.UTF8.GetBytes(key); // Кодирует строку в последовательность байтов.
-            KeyExtension(data);
+            byte[] bKey = Encoding.UTF8.GetBytes(key); // Кодирует строку в последовательность байтов.
+            KeyExtension(bKey);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Blowfish
             var a = (ushort)(x & 0x00FF);
 
             var y = _s[0, a] + _s[1, b]; // Складывает 1-ый блок со 2-ым по модулю 2 в 32.
-            y ^= _s[2, c]; // Складывает результат предыдущего действия по модулю 2 с с 3-им блоком
+            y ^= _s[2, c]; // Складывает результат предыдущего действия по модулю 2 с с 3-им блоком.
             y += _s[3, d]; // Складывает результат предыдущего действия по модулю 2 в 32 с 4-ым блоком.
 
             return y; // Возвращает 32-битное выходное значение.
