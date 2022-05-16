@@ -21,15 +21,15 @@ namespace Blowfish
 
         private void button2_Click(object sender, EventArgs e)
         {
-            SaveFile(richTextBox1);
+            SaveFile(richTextBox2);
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (CheckKey() && CheckTextBox(richTextBox2))
+            if (CheckKey() && CheckTextBox(richTextBox1))
             {
                 bf.KeyExtension(textBox1.Text);
-                richTextBox1.Text = bf.Decipher(richTextBox2.Text);
+                richTextBox2.Text = bf.Decipher(richTextBox1.Text);
             }
         }
 
@@ -40,16 +40,6 @@ namespace Blowfish
                 bf.KeyExtension(textBox1.Text);
                 richTextBox2.Text = bf.Encipher(richTextBox1.Text);
             }            
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            OpenFile(richTextBox2);
-        }
-
-        private void button6_Click(object sender, EventArgs e)
-        {
-            SaveFile(richTextBox2);
         }
 
         private bool CheckKey()
