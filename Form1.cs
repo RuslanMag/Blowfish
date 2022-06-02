@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Threading;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -26,19 +28,36 @@ namespace Blowfish
 
         private void button3_Click(object sender, EventArgs e)
         {
+            var watch = new Stopwatch();
+
             if (CheckKey() && CheckTextBox(richTextBox1))
             {
                 bf.KeyExtension(textBox1.Text);
+
+                watch.Start();
                 richTextBox2.Text = bf.Decipher(richTextBox1.Text);
+                watch.Stop();
+                label7.Text = "Время расшифровывания: " + watch.Elapsed;
             }
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
+            var watch = new Stopwatch();
+
             if (CheckKey() && CheckTextBox(richTextBox1))
             {
+                watch.Start();
                 bf.KeyExtension(textBox1.Text);
+                watch.Stop();
+                label5.Text = "Время генерации ключа: " + watch.Elapsed;
+
+                watch.Reset();
+
+                watch.Start();
                 richTextBox2.Text = bf.Encipher(richTextBox1.Text);
+                watch.Stop();
+                label6.Text = "Время шифрования: " + watch.Elapsed;
             }            
         }
 
